@@ -1,7 +1,7 @@
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 export const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
@@ -12,22 +12,20 @@ export const ThemeToggle = () => {
   }, []);
 
   if (!mounted) {
-    return <DropdownMenuItem>Loading...</DropdownMenuItem>;
+    return <Button variant="ghost" size="icon"><Sun className="h-5 w-5" /></Button>;
   }
 
   return (
-    <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+    <Button 
+      variant="ghost" 
+      size="icon"
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+    >
       {theme === 'dark' ? (
-        <>
-          <Sun className="h-4 w-4 mr-2" />
-          Light Mode
-        </>
+        <Sun className="h-5 w-5" />
       ) : (
-        <>
-          <Moon className="h-4 w-4 mr-2" />
-          Dark Mode
-        </>
+        <Moon className="h-5 w-5" />
       )}
-    </DropdownMenuItem>
+    </Button>
   );
 };
