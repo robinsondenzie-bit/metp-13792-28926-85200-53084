@@ -1,0 +1,92 @@
+[
+  {
+    "id": "user_1",
+    "name": "Alex Morgan",
+    "handle": "alexmorgan",
+    "avatarSeed": "A",
+    "balance": {
+      "available": 124567,
+      "pending": 5000,
+      "onHold": 12500,
+      "total": 142067
+    },
+    "linkedCards": [
+      { "type": "CARD", "last4": "4242", "brand": "Visa" }
+    ],
+    "linkedBanks": [
+      { "type": "BANK", "last4": "6789", "name": "Chase Checking" }
+    ]
+  },
+  {
+    "id": "user_2",
+    "name": "Jordan Lee",
+    "handle": "jordanlee",
+    "avatarSeed": "J",
+    "balance": {
+      "available": 89430,
+      "pending": 2000,
+      "onHold": 5000,
+      "total": 96430
+    },
+    "linkedCards": [
+      { "type": "CARD", "last4": "1234", "brand": "Mastercard" }
+    ],
+    "linkedBanks": [
+      { "type": "BANK", "last4": "3456", "name": "Bank of America" }
+    ]
+  },
+  {
+    "id": "user_3",
+    "name": "Taylor Swift",
+    "handle": "taylorswift",
+    "avatarSeed": "T",
+    "balance": {
+      "available": 256789,
+      "pending": 15000,
+      "onHold": 30000,
+      "total": 301789
+    },
+    "linkedCards": [
+      { "type": "CARD", "last4": "5678", "brand": "Amex" }
+    ],
+    "linkedBanks": [
+      { "type": "BANK", "last4": "9012", "name": "Wells Fargo" }
+    ]
+  },
+  {
+    "id": "user_4",
+    "name": "Riley Chen",
+    "handle": "rileychen",
+    "avatarSeed": "R",
+    "balance": {
+      "available": 45230,
+      "pending": 1000,
+      "onHold": 2500,
+      "total": 48730
+    },
+    "linkedCards": [
+      { "type": "CARD", "last4": "8765", "brand": "Visa" }
+    ],
+    "linkedBanks": [
+      { "type": "BANK", "last4": "4321", "name": "Citibank" }
+    ]
+  },
+  {
+    "id": "user_5",
+    "name": "Sam Rivera",
+    "handle": "samrivera",
+    "avatarSeed": "S",
+    "balance": {
+      "available": 178900,
+      "pending": 8000,
+      "onHold": 18000,
+      "total": 204900
+    },
+    "linkedCards": [
+      { "type": "CARD", "last4": "3344", "brand": "Discover" }
+    ],
+    "linkedBanks": [
+      { "type": "BANK", "last4": "7788", "name": "TD Bank" }
+    ]
+  }
+]
