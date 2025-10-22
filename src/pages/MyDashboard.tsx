@@ -94,10 +94,10 @@ export default function MyDashboard() {
       setSellingOrders(sellingData || []);
       
       // Calculate selling stats
-      const pending = sellingData?.filter(o => o.status === 'PAID_AWAITING_SHIPMENT').length || 0;
-      const shipped = sellingData?.filter(o => o.status === 'SHIPPED').length || 0;
+      const pending = sellingData?.filter(o => o.status === 'PENDING_SHIPMENT').length || 0;
+      const shipped = sellingData?.filter(o => o.status === 'SHIPPED' || o.status === 'AWAITING_ADMIN_APPROVAL').length || 0;
       const completed = sellingData?.filter(o => o.status === 'COMPLETED') || [];
-      const awaitingRelease = sellingData?.filter(o => o.status === 'SHIPPED')
+      const awaitingRelease = sellingData?.filter(o => o.status === 'AWAITING_RELEASE')
         .reduce((sum, o) => sum + o.amount_cents, 0) || 0;
       const totalEarnings = completed.reduce((sum, o) => sum + o.amount_cents, 0);
 
@@ -146,19 +146,26 @@ export default function MyDashboard() {
     }));
 
     try {
-      const { error } = await supabase
-        .from('orders')
-        .update({
-          tracking_number: form.trackingNumber,
-          shipping_carrier: form.carrier,
-          status: 'SHIPPED',
-          shipped_at: new Date().toISOString(),
-        })
-        .eq('id', orderId);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('You must be logged in');
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke('add-tracking', {
+        body: {
+          orderId,
+          carrier: form.carrier,
+          trackingNumber: form.trackingNumber
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
 
       if (error) throw error;
 
-      toast.success('Payment will be released to your bank as soon as tracking is verified.', {
+      toast.success('Tracking information submitted. Awaiting admin verification.', {
         duration: 5000,
       });
 
@@ -171,7 +178,7 @@ export default function MyDashboard() {
       loadData();
     } catch (error) {
       console.error('Error updating shipment:', error);
-      toast.error('Failed to confirm shipment');
+      toast.error('Failed to submit tracking');
       setShippingForms(prev => ({
         ...prev,
         [orderId]: { ...prev[orderId], submitting: false },
@@ -188,17 +195,21 @@ export default function MyDashboard() {
 
   const getStatusBadge = (status: string) => {
     const variants: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
-      PENDING: 'outline',
-      PAID_AWAITING_SHIPMENT: 'secondary',
+      PENDING_PAYMENT: 'outline',
+      PENDING_SHIPMENT: 'secondary',
+      AWAITING_ADMIN_APPROVAL: 'secondary',
       SHIPPED: 'default',
+      AWAITING_RELEASE: 'default',
       COMPLETED: 'default',
       CANCELLED: 'destructive',
     };
 
     const labels: { [key: string]: string } = {
-      PENDING: 'Pending',
-      PAID_AWAITING_SHIPMENT: 'Paid – Awaiting Shipment',
+      PENDING_PAYMENT: 'Payment Pending',
+      PENDING_SHIPMENT: 'Awaiting Shipment',
+      AWAITING_ADMIN_APPROVAL: 'Tracking Submitted',
       SHIPPED: 'Shipped',
+      AWAITING_RELEASE: 'Awaiting Release',
       COMPLETED: 'Completed',
       CANCELLED: 'Cancelled',
     };
@@ -359,7 +370,7 @@ export default function MyDashboard() {
                           )}
                         </div>
 
-                        {order.status === 'PAID_AWAITING_SHIPMENT' && (
+                        {order.status === 'PENDING_SHIPMENT' && (
                           <Card className="w-full md:w-80 p-4 bg-muted/50">
                             <h3 className="font-semibold text-sm mb-3">Ship item to release payment</h3>
                             <div className="space-y-3">

@@ -9,6 +9,7 @@ import { Loader2, Users, DollarSign, TrendingUp, Activity, Check, X } from 'luci
 import { toast } from '@/hooks/use-toast';
 import { FundWalletModal } from '@/components/admin/FundWalletModal';
 import { PendingTransactions } from '@/components/admin/PendingTransactions';
+import { PendingTracking } from '@/components/admin/PendingTracking';
 import { BackButton } from '@/components/BackButton';
 
 export default function Admin() {
@@ -377,9 +378,12 @@ export default function Admin() {
         </div>
 
         {/* Pending Transactions */}
-        <div className="space-y-2">
+        <div className="space-y-4">
           <h2 className="text-lg font-bold">Pending Approvals</h2>
-          <PendingTransactions />
+          <div className="grid gap-6 md:grid-cols-2">
+            <PendingTransactions />
+            <PendingTracking />
+          </div>
         </div>
 
         {/* Pending Wallet Top-ups */}

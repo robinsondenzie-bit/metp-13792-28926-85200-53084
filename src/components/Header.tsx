@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { NotificationBell } from '@/components/NotificationBell';
 
 interface HeaderProps {
   onSignOut: () => void;
@@ -65,6 +66,8 @@ export const Header = ({ onSignOut, userEmail }: HeaderProps) => {
       </div>
 
       <div className="flex items-center gap-2">
+        <NotificationBell />
+        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -105,7 +108,6 @@ export const Header = ({ onSignOut, userEmail }: HeaderProps) => {
               <HelpCircle className="h-4 w-4 mr-2" />
               Support
             </DropdownMenuItem>
-            <ThemeToggle />
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onSignOut} className="text-destructive">
               <LogOut className="h-4 w-4 mr-2" />

@@ -99,6 +99,21 @@ Deno.serve(async (req) => {
 
     if (walletError) throw walletError;
 
+    // Send notification to seller
+    const { error: notificationError } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: sellerId,
+        type: 'NEW_ORDER',
+        title: 'New Order Received',
+        message: `You have a new order for "${itemDescription}" worth ${formatCurrency(amountCents)}`,
+        order_id: order.id
+      });
+
+    if (notificationError) {
+      console.error('Failed to send notification:', notificationError);
+    }
+
     console.log('Order created with escrow:', { orderId: order.id, buyerId: user.id, sellerId, amount: amountCents });
 
     return new Response(
@@ -114,3 +129,10 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+function formatCurrency(cents: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(cents / 100);
+}

@@ -56,11 +56,11 @@ Deno.serve(async (req) => {
 
     if (shipmentError) throw shipmentError;
 
-    // Update order status to shipped
+    // Update order status to awaiting admin verification
     const { error: updateError } = await supabase
       .from('orders')
       .update({
-        status: 'SHIPPED',
+        status: 'AWAITING_ADMIN_APPROVAL',
         shipped_at: new Date().toISOString(),
         shipping_carrier: carrier,
         tracking_number: trackingNumber
@@ -68,6 +68,24 @@ Deno.serve(async (req) => {
       .eq('id', orderId);
 
     if (updateError) throw updateError;
+
+    // Notify admins about tracking submission
+    const { data: admins } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'admin');
+
+    if (admins && admins.length > 0) {
+      const adminNotifications = admins.map(admin => ({
+        user_id: admin.user_id,
+        type: 'TRACKING_SUBMITTED',
+        title: 'New Tracking Info Submitted',
+        message: `Order ${orderId.substring(0, 8)}... has tracking info ready for verification`,
+        order_id: orderId
+      }));
+
+      await supabase.from('notifications').insert(adminNotifications);
+    }
 
     console.log('Tracking added:', { orderId, carrier, trackingNumber });
 
