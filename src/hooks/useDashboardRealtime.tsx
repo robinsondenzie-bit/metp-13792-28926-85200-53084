@@ -20,7 +20,7 @@ export const useDashboardRealtime = (onUpdate: () => void) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || !mounted) return;
 
-      // Set up WebSocket channel for escrow_hold changes
+      // Set up WebSocket channel for escrow_hold, orders, and shipments changes
       channelRef.current = supabase
         .channel('dashboard-changes')
         .on(
@@ -40,6 +40,26 @@ export const useDashboardRealtime = (onUpdate: () => void) => {
             schema: 'public',
             table: 'escrow_hold',
             filter: `seller_id=eq.${user.id}`,
+          },
+          handleUpdate
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'orders',
+            filter: `seller_id=eq.${user.id}`,
+          },
+          handleUpdate
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'orders',
+            filter: `buyer_id=eq.${user.id}`,
           },
           handleUpdate
         )
