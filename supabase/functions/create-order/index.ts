@@ -24,11 +24,24 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { sellerId, amountCents, itemDescription } = await req.json();
+    const { sellerHandle, amountCents, itemDescription } = await req.json();
 
-    if (!sellerId || !amountCents || !itemDescription) {
+    if (!sellerHandle || !amountCents || !itemDescription) {
       throw new Error('Missing required fields');
     }
+
+    // Look up seller by handle
+    const { data: sellerProfile, error: sellerError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('handle', sellerHandle)
+      .single();
+
+    if (sellerError || !sellerProfile) {
+      throw new Error('Seller not found');
+    }
+
+    const sellerId = sellerProfile.id;
 
     // Verify buyer has sufficient balance
     const { data: wallet } = await supabase

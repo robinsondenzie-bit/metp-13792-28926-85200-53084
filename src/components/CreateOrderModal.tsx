@@ -21,7 +21,7 @@ interface CreateOrderModalProps {
 }
 
 export const CreateOrderModal = ({ open, onOpenChange, onSuccess, availableBalance }: CreateOrderModalProps) => {
-  const [sellerId, setSellerId] = useState('');
+  const [sellerHandle, setSellerHandle] = useState('');
   const [amount, setAmount] = useState('');
   const [itemDescription, setItemDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -65,7 +65,7 @@ export const CreateOrderModal = ({ open, onOpenChange, onSuccess, availableBalan
 
       const { error } = await supabase.functions.invoke('create-order', {
         body: {
-          sellerId,
+          sellerHandle,
           amountCents,
           itemDescription: itemDescription.trim(),
         },
@@ -85,7 +85,7 @@ export const CreateOrderModal = ({ open, onOpenChange, onSuccess, availableBalan
       onOpenChange(false);
       
       // Reset form
-      setSellerId('');
+      setSellerHandle('');
       setAmount('');
       setItemDescription('');
     } catch (error: any) {
@@ -118,12 +118,12 @@ export const CreateOrderModal = ({ open, onOpenChange, onSuccess, availableBalan
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="sellerId">Seller User ID</Label>
+            <Label htmlFor="sellerHandle">Seller Handle</Label>
             <Input
-              id="sellerId"
-              placeholder="Enter seller's user ID"
-              value={sellerId}
-              onChange={(e) => setSellerId(e.target.value)}
+              id="sellerHandle"
+              placeholder="Enter seller's handle (e.g., john123)"
+              value={sellerHandle}
+              onChange={(e) => setSellerHandle(e.target.value)}
               required
             />
           </div>
