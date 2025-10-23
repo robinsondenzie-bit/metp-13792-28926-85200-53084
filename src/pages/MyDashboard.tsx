@@ -94,12 +94,19 @@ export default function MyDashboard() {
       setSellingOrders(sellingData || []);
       
       // Calculate selling stats
-      const pending = sellingData?.filter(o => o.status === 'PENDING_SHIPMENT').length || 0;
+      const pending = sellingData?.filter(o => o.status === 'PENDING_PAYMENT' || o.status === 'PENDING_SHIPMENT').length || 0;
       const shipped = sellingData?.filter(o => o.status === 'SHIPPED' || o.status === 'AWAITING_ADMIN_APPROVAL').length || 0;
       const completed = sellingData?.filter(o => o.status === 'COMPLETED') || [];
-      const awaitingRelease = sellingData?.filter(o => o.status === 'AWAITING_RELEASE')
-        .reduce((sum, o) => sum + o.amount_cents, 0) || 0;
       const totalEarnings = completed.reduce((sum, o) => sum + o.amount_cents, 0);
+
+      // Get awaiting release from escrow_hold table (funds held in escrow)
+      const { data: escrowData } = await supabase
+        .from('escrow_hold')
+        .select('amount_cents')
+        .eq('seller_id', user.id)
+        .eq('status', 'held');
+
+      const awaitingRelease = escrowData?.reduce((sum, e) => sum + e.amount_cents, 0) || 0;
 
       setSellingStats({
         pendingOrders: pending,

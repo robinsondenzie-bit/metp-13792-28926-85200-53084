@@ -15,6 +15,7 @@ interface Order {
   seller_id: string;
   buyer_id: string;
   created_at: string;
+  status: string;
   profiles?: {
     handle: string;
     full_name: string;
@@ -29,7 +30,7 @@ export const PendingTracking = () => {
   useEffect(() => {
     loadPendingOrders();
 
-    // Set up realtime subscription
+    // Set up realtime subscription for both statuses
     const channel = supabase
       .channel('pending-tracking-changes')
       .on(
@@ -38,7 +39,6 @@ export const PendingTracking = () => {
           event: '*',
           schema: 'public',
           table: 'orders',
-          filter: 'status=eq.AWAITING_ADMIN_APPROVAL',
         },
         () => {
           console.log('Order status changed, reloading...');
@@ -55,13 +55,14 @@ export const PendingTracking = () => {
   const loadPendingOrders = async () => {
     try {
       setLoading(true);
+      // Get orders that are awaiting admin approval OR pending payment with tracking submitted
       const { data, error } = await supabase
         .from('orders')
         .select(`
           *,
           profiles:seller_id (handle, full_name)
         `)
-        .eq('status', 'AWAITING_ADMIN_APPROVAL')
+        .or('status.eq.AWAITING_ADMIN_APPROVAL,and(status.eq.PENDING_PAYMENT,tracking_number.not.is.null)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -147,9 +148,14 @@ export const PendingTracking = () => {
                           Order ID: {order.id.substring(0, 8)}...
                         </p>
                       </div>
-                      <Badge variant="outline" className="bg-yellow-500/10">
-                        {formatCurrency(order.amount_cents)}
-                      </Badge>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge variant="outline" className="bg-yellow-500/10">
+                          {formatCurrency(order.amount_cents)}
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {order.status === 'AWAITING_ADMIN_APPROVAL' ? 'Awaiting Approval' : 'Pending Payment'}
+                        </Badge>
+                      </div>
                     </div>
 
                     <div className="bg-accent/50 rounded-lg p-3 space-y-2">
