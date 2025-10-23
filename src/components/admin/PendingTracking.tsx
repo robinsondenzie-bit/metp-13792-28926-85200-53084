@@ -28,6 +28,28 @@ export const PendingTracking = () => {
 
   useEffect(() => {
     loadPendingOrders();
+
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('pending-tracking-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: 'status=eq.AWAITING_ADMIN_APPROVAL',
+        },
+        () => {
+          console.log('Order status changed, reloading...');
+          loadPendingOrders();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadPendingOrders = async () => {

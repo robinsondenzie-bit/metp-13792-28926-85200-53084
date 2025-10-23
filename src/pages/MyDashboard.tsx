@@ -370,7 +370,7 @@ export default function MyDashboard() {
                           )}
                         </div>
 
-                        {order.status === 'PENDING_SHIPMENT' && (
+                        {(order.status === 'PENDING_SHIPMENT' || order.status === 'PENDING_PAYMENT') && (
                           <Card className="w-full md:w-80 p-4 bg-muted/50">
                             <h3 className="font-semibold text-sm mb-3">Ship item to release payment</h3>
                             <div className="space-y-3">
@@ -444,6 +444,19 @@ export default function MyDashboard() {
                               </Button>
                             </div>
                           </Card>
+                        )}
+
+                        {order.status === 'AWAITING_ADMIN_APPROVAL' && (
+                          <div className="w-full md:w-80 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                            <p className="text-sm font-medium text-yellow-700 dark:text-yellow-500">
+                              ⏳ Tracking submitted - awaiting admin verification
+                            </p>
+                            {order.tracking_number && (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {order.shipping_carrier}: {order.tracking_number}
+                              </p>
+                            )}
+                          </div>
                         )}
                       </div>
                     </Card>
