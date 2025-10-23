@@ -108,12 +108,25 @@ export default function Admin() {
     try {
       const { data, error } = await supabase
         .from('wallet_topups')
-        .select('*, profiles(handle)')
+        .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPendingTopups(data || []);
+
+      const userIds = Array.from(new Set((data || []).map((t: any) => t.user_id).filter(Boolean)));
+      let profilesMap: Record<string, { handle: string }> = {};
+      if (userIds.length) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, handle')
+          .in('id', userIds);
+        if (profilesError) throw profilesError;
+        profilesMap = Object.fromEntries((profilesData || []).map((p: any) => [p.id, { handle: p.handle }]));
+      }
+
+      const merged = (data || []).map((t: any) => ({ ...t, profiles: profilesMap[t.user_id] }));
+      setPendingTopups(merged);
     } catch (error) {
       console.error('Error loading topups:', error);
     }
@@ -123,13 +136,26 @@ export default function Admin() {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*, profiles!orders_seller_id_fkey(handle)')
+        .select('*')
         .eq('status', 'SHIPPED')
         .is('release_approved_at', null)
         .order('shipped_at', { ascending: true });
 
       if (error) throw error;
-      setPendingReleases(data || []);
+
+      const sellerIds = Array.from(new Set((data || []).map((o: any) => o.seller_id).filter(Boolean)));
+      let profilesMap: Record<string, { handle: string }> = {};
+      if (sellerIds.length) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, handle')
+          .in('id', sellerIds);
+        if (profilesError) throw profilesError;
+        profilesMap = Object.fromEntries((profilesData || []).map((p: any) => [p.id, { handle: p.handle }]));
+      }
+
+      const merged = (data || []).map((o: any) => ({ ...o, profiles: profilesMap[o.seller_id] }));
+      setPendingReleases(merged || []);
     } catch (error) {
       console.error('Error loading pending releases:', error);
     }

@@ -55,19 +55,35 @@ export const PendingTracking = () => {
   const loadPendingOrders = async () => {
     try {
       setLoading(true);
-      // Get orders that are awaiting admin approval OR pending payment with tracking submitted
-      const { data, error } = await supabase
+      // Fetch orders awaiting approval OR pending payment with tracking submitted
+      const { data: ordersData, error } = await supabase
         .from('orders')
-        .select(`
-          *,
-          profiles:seller_id (handle, full_name)
-        `)
-        .or('status.eq.AWAITING_ADMIN_APPROVAL,and(status.eq.PENDING_PAYMENT,tracking_number.not.is.null)')
+        .select('*')
+        .or('status.eq.AWAITING_ADMIN_APPROVAL,and(status.eq.PENDING_PAYMENT,not.is.tracking_number.null)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      setOrders(data || []);
+      // Map seller profiles
+      const sellerIds = Array.from(new Set((ordersData || []).map((o) => o.seller_id).filter(Boolean)));
+      let profilesMap: Record<string, { handle: string; full_name: string }> = {};
+      if (sellerIds.length) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, handle, full_name')
+          .in('id', sellerIds);
+        if (profilesError) throw profilesError;
+        profilesMap = Object.fromEntries(
+          (profilesData || []).map((p) => [p.id, { handle: p.handle, full_name: p.full_name }])
+        );
+      }
+
+      const merged = (ordersData || []).map((o: any) => ({
+        ...o,
+        profiles: profilesMap[o.seller_id] || undefined,
+      }));
+
+      setOrders(merged);
     } catch (error: any) {
       console.error('Error loading pending orders:', error);
       toast.error('Failed to load pending orders');
