@@ -30,6 +30,7 @@ export default function Admin() {
   const [pendingReleases, setPendingReleases] = useState<any[]>([]);
   const [loadingTopups, setLoadingTopups] = useState(false);
   const [loadingReleases, setLoadingReleases] = useState(false);
+  const [pendingReleaseAmount, setPendingReleaseAmount] = useState(0);
 
   useEffect(() => {
     checkAdminAccess();
@@ -155,6 +156,10 @@ export default function Admin() {
 
       const merged = (data || []).map((o: any) => ({ ...o, profiles: profilesMap[o.seller_id] }));
       setPendingReleases(merged || []);
+      
+      // Calculate total pending release amount
+      const totalPending = merged.reduce((sum: number, order: any) => sum + order.amount_cents, 0);
+      setPendingReleaseAmount(totalPending);
     } catch (error) {
       console.error('Error loading pending releases:', error);
     }
@@ -352,7 +357,7 @@ export default function Admin() {
 
       <main className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card className="p-6">
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -397,6 +402,21 @@ export default function Admin() {
               <div>
                 <p className="text-sm text-muted-foreground">Active Today</p>
                 <p className="text-2xl font-bold">{stats.activeToday}</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-orange-500/20">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                <DollarSign className="h-6 w-6 text-yellow-600 dark:text-yellow-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Pending Release</p>
+                <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-500">
+                  {formatCurrency(pendingReleaseAmount)}
+                </p>
+                <p className="text-xs text-muted-foreground">{pendingReleases.length} orders</p>
               </div>
             </div>
           </Card>
@@ -469,44 +489,84 @@ export default function Admin() {
         <Card>
           <CardHeader>
             <CardTitle>Orders Awaiting Release Approval</CardTitle>
-            <CardDescription>Shipped orders waiting for payment release approval</CardDescription>
+            <CardDescription>Orders ready for payment release to sellers</CardDescription>
           </CardHeader>
           <CardContent>
             {pendingReleases.length === 0 ? (
               <p className="text-muted-foreground text-center py-4">No orders awaiting release</p>
             ) : (
               <div className="space-y-3">
-                {pendingReleases.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
-                      <p className="text-sm">Seller: @{order.profiles?.handle}</p>
-                      <p className="text-sm text-muted-foreground">{order.item_description}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Shipped: {new Date(order.shipped_at).toLocaleString()}
-                      </p>
-                      {order.tracking_number && (
-                        <p className="text-xs text-muted-foreground">
-                          {order.shipping_carrier}: {order.tracking_number}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <p className="text-lg font-bold">
-                        {formatCurrency(order.amount_cents)}
-                      </p>
+                {pendingReleases.map((order) => {
+                  const isAwaiting = order.status === 'AWAITING_RELEASE';
+                  return (
+                    <div key={order.id} className="p-4 border-2 rounded-lg bg-card">
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-semibold">Order #{order.id.slice(0, 8)}</p>
+                            <Badge variant={isAwaiting ? 'default' : 'secondary'}>
+                              {isAwaiting ? 'Ready to Release' : 'Pending'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm font-medium">Seller: @{order.profiles?.handle}</p>
+                          <p className="text-sm text-muted-foreground">{order.item_description}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground mb-1">Release Amount</p>
+                          <p className="text-2xl font-bold text-success">
+                            {formatCurrency(order.amount_cents)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-muted/50 rounded-lg p-3 space-y-2 mb-3">
+                        {order.tracking_number && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Tracking:</span>
+                            <span className="font-medium">
+                              {order.shipping_carrier}: {order.tracking_number}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Created:</span>
+                          <span>{new Date(order.created_at).toLocaleDateString()}</span>
+                        </div>
+                        {order.shipped_at && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Shipped:</span>
+                            <span>{new Date(order.shipped_at).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                        {order.delivered_at && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Delivered:</span>
+                            <span>{new Date(order.delivered_at).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </div>
+
                       <Button
-                        size="sm"
-                        variant="default"
+                        className="w-full"
+                        size="lg"
                         onClick={() => handleApproveRelease(order.id)}
                         disabled={loadingReleases}
                       >
-                        <Check className="h-4 w-4 mr-1" />
-                        Approve Release
+                        {loadingReleases ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <Check className="h-4 w-4 mr-2" />
+                            Approve & Release {formatCurrency(order.amount_cents)}
+                          </>
+                        )}
                       </Button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

@@ -14,7 +14,7 @@ import { Header } from '@/components/Header';
 import { BackButton } from '@/components/BackButton';
 import { EscrowActivity } from '@/components/EscrowActivity';
 import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
-import { TransactionFeed } from '@/components/TransactionFeed';
+import { TransactionHistory } from '@/components/TransactionHistory';
 
 interface Order {
   id: string;
@@ -268,12 +268,7 @@ export default function MyDashboard() {
           </div>
         </Card>
 
-        <Card className="p-4 md:p-6">
-          <div className="p-4 border-b border-border">
-            <h2 className="text-lg md:text-xl font-bold">Activity</h2>
-          </div>
-          <TransactionFeed />
-        </Card>
+        <TransactionHistory />
 
         <Tabs defaultValue="selling" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
