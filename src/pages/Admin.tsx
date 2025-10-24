@@ -31,6 +31,7 @@ export default function Admin() {
   const [loadingTopups, setLoadingTopups] = useState(false);
   const [loadingReleases, setLoadingReleases] = useState(false);
   const [pendingReleaseAmount, setPendingReleaseAmount] = useState(0);
+  const [awaitingReleaseCount, setAwaitingReleaseCount] = useState(0);
 
   useEffect(() => {
     checkAdminAccess();
@@ -157,9 +158,11 @@ export default function Admin() {
       const merged = (data || []).map((o: any) => ({ ...o, profiles: profilesMap[o.seller_id] }));
       setPendingReleases(merged || []);
       
-      // Calculate total pending release amount
-      const totalPending = merged.reduce((sum: number, order: any) => sum + order.amount_cents, 0);
+      // Calculate total pending release amount for AWAITING_RELEASE only
+      const awaiting = merged.filter((order: any) => order.status === 'AWAITING_RELEASE');
+      const totalPending = awaiting.reduce((sum: number, order: any) => sum + order.amount_cents, 0);
       setPendingReleaseAmount(totalPending);
+      setAwaitingReleaseCount(awaiting.length);
     } catch (error) {
       console.error('Error loading pending releases:', error);
     }
@@ -416,7 +419,7 @@ export default function Admin() {
                 <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-500">
                   {formatCurrency(pendingReleaseAmount)}
                 </p>
-                <p className="text-xs text-muted-foreground">{pendingReleases.length} orders</p>
+                <p className="text-xs text-muted-foreground">{awaitingReleaseCount} orders</p>
               </div>
             </div>
           </Card>
@@ -550,7 +553,7 @@ export default function Admin() {
                         className="w-full"
                         size="lg"
                         onClick={() => handleApproveRelease(order.id)}
-                        disabled={loadingReleases}
+                        disabled={loadingReleases || !isAwaiting}
                       >
                         {loadingReleases ? (
                           <>
@@ -560,7 +563,7 @@ export default function Admin() {
                         ) : (
                           <>
                             <Check className="h-4 w-4 mr-2" />
-                            Approve & Release {formatCurrency(order.amount_cents)}
+                            {isAwaiting ? (<>Approve & Release {formatCurrency(order.amount_cents)}</>) : (<>Awaiting delivery confirmation</>)}
                           </>
                         )}
                       </Button>
