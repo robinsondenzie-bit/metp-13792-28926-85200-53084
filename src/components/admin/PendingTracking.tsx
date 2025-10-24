@@ -59,7 +59,8 @@ export const PendingTracking = () => {
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select('*')
-        .or('status.eq.AWAITING_ADMIN_APPROVAL,and(status.eq.PENDING_PAYMENT,not.is.tracking_number.null)')
+        .in('status', ['AWAITING_ADMIN_APPROVAL', 'PENDING_PAYMENT'])
+        .not('tracking_number', 'is', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

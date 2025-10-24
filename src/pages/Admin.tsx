@@ -137,9 +137,8 @@ export default function Admin() {
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .eq('status', 'SHIPPED')
-        .is('release_approved_at', null)
-        .order('shipped_at', { ascending: true });
+        .or('status.eq.AWAITING_RELEASE,and(status.eq.SHIPPED,release_approved_at.is.null)')
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
 

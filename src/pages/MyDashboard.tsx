@@ -99,12 +99,13 @@ export default function MyDashboard() {
       const completed = sellingData?.filter(o => o.status === 'COMPLETED') || [];
       const totalEarnings = completed.reduce((sum, o) => sum + o.amount_cents, 0);
 
-      // Get awaiting release from escrow_hold table (funds held in escrow)
+      // Get awaiting release from escrow_hold table (funds held in escrow for this seller)
       const { data: escrowData } = await supabase
         .from('escrow_hold')
         .select('amount_cents')
-        .eq('seller_id', user.id)
-        .eq('status', 'held');
+        .eq('user_id', user.id)
+        .eq('status', 'held')
+        .gt('amount_cents', 0);
 
       const awaitingRelease = escrowData?.reduce((sum, e) => sum + e.amount_cents, 0) || 0;
 
