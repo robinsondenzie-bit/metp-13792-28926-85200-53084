@@ -56,11 +56,11 @@ Deno.serve(async (req) => {
 
     if (shipmentError) throw shipmentError;
 
-    // Update order status to awaiting admin verification
+    // Update order status to shipped
     const { error: updateError } = await supabase
       .from('orders')
       .update({
-        status: 'AWAITING_ADMIN_APPROVAL',
+        status: 'SHIPPED',
         shipped_at: new Date().toISOString(),
         shipping_carrier: carrier,
         tracking_number: trackingNumber

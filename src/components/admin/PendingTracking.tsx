@@ -55,11 +55,11 @@ export const PendingTracking = () => {
   const loadPendingOrders = async () => {
     try {
       setLoading(true);
-      // Fetch orders awaiting approval OR pending payment with tracking submitted
+      // Fetch orders that are shipped OR pending payment with tracking submitted
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select('*')
-        .in('status', ['AWAITING_ADMIN_APPROVAL', 'PENDING_PAYMENT'])
+        .in('status', ['SHIPPED', 'PENDING_PAYMENT'])
         .not('tracking_number', 'is', null)
         .order('created_at', { ascending: false });
 
@@ -170,7 +170,7 @@ export const PendingTracking = () => {
                           {formatCurrency(order.amount_cents)}
                         </Badge>
                         <Badge variant="secondary" className="text-xs">
-                          {order.status === 'AWAITING_ADMIN_APPROVAL' ? 'Awaiting Approval' : 'Pending Payment'}
+                          {order.status === 'SHIPPED' ? 'Shipped' : 'Pending Payment'}
                         </Badge>
                       </div>
                     </div>

@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { FundWalletModal } from '@/components/admin/FundWalletModal';
 import { PendingTransactions } from '@/components/admin/PendingTransactions';
 import { PendingTracking } from '@/components/admin/PendingTracking';
+import { ManagePaymentMethods } from '@/components/admin/ManagePaymentMethods';
 import { BackButton } from '@/components/BackButton';
 
 export default function Admin() {
@@ -138,7 +139,10 @@ export default function Admin() {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          escrow_hold!escrow_hold_order_id_fkey(amount_cents, status)
+        `)
         .or('status.eq.AWAITING_RELEASE,and(status.eq.SHIPPED,release_approved_at.is.null)')
         .order('created_at', { ascending: true });
 
@@ -432,6 +436,7 @@ export default function Admin() {
             <PendingTransactions />
             <PendingTracking />
           </div>
+          <ManagePaymentMethods />
         </div>
 
         {/* Pending Wallet Top-ups */}
@@ -548,6 +553,17 @@ export default function Admin() {
                           </div>
                         )}
                       </div>
+
+                      {order.escrow_hold && order.escrow_hold.length > 0 && (
+                        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg mb-3">
+                          <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+                            Escrow Amount: {formatCurrency(order.escrow_hold[0].amount_cents)}
+                          </p>
+                          <p className="text-xs text-yellow-600 dark:text-yellow-300 mt-1">
+                            Status: {order.escrow_hold[0].status}
+                          </p>
+                        </div>
+                      )}
 
                       <Button
                         className="w-full"
