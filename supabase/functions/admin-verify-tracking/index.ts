@@ -54,11 +54,11 @@ Deno.serve(async (req) => {
     }
 
     if (approved) {
-      // Approve tracking and mark as shipped
+      // Approve tracking and mark as awaiting release
       const { error: updateError } = await supabase
         .from('orders')
         .update({
-          status: 'SHIPPED',
+          status: 'AWAITING_RELEASE',
           release_approved_at: new Date().toISOString()
         })
         .eq('id', orderId);
