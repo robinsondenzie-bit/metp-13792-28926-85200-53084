@@ -4,21 +4,59 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MetaPay Business Hub - Manage Your Payments</title>
-    <meta name="description" content="MetaPay Business Hub - Send and receive payments, manage your balance, and cash out to your bank account instantly." />
+    <meta
+      name="description"
+      content="MetaPay Business Hub - Send and receive payments, manage your balance, and cash out to your bank account instantly."
+    />
     <meta name="author" content="MetaPay" />
 
+    <!-- ✅ Clean Open Graph tags -->
     <meta property="og:title" content="MetaPay Business Hub - Manage Your Payments" />
-    <meta property="og:description" content="MetaPay Business Hub - Send and receive payments, manage your balance, and cash out to your bank account instantly." />
+    <meta
+      property="og:description"
+      content="MetaPay Business Hub - Send and receive payments, manage your balance, and cash out to your bank account instantly."
+    />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <!-- ✅ Your new banner image -->
+    <meta property="og:image" content="https://i.ibb.co/TDVbbth6/banner.png" />
 
+    <!-- ✅ Twitter meta tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:site" content="@metapay" />
+    <meta name="twitter:image" content="https://i.ibb.co/TDVbbth6/banner.png" />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- ✅ Lovable cleanup script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const selectors = [
+          "#lovable-badge",
+          "[data-lovable]",
+          ".lovable-badge",
+          "img[src*='lovable.dev']",
+          "a[href*='lovable.dev']"
+        ];
+        selectors.forEach(sel => {
+          document.querySelectorAll(sel).forEach(el => el.remove());
+        });
+        document.querySelectorAll('script[src*="lovable.dev"]').forEach(s => s.remove());
+      });
+    </script>
+
+    <!-- ✅ CSS hard hide fallback -->
+    <style>
+      #lovable-badge,
+      .lovable-badge,
+      [data-lovable] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+    </style>
   </body>
 </html>
