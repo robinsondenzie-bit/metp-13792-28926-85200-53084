@@ -15,6 +15,7 @@ import { BackButton } from '@/components/BackButton';
 import { EscrowActivity } from '@/components/EscrowActivity';
 import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { TransactionHistory } from '@/components/TransactionHistory';
+import { UserChatPanel } from '@/components/UserChatPanel';
 
 interface Order {
   id: string;
@@ -269,6 +270,8 @@ export default function MyDashboard() {
         </Card>
 
         <TransactionHistory />
+
+        <UserChatPanel />
 
         <Tabs defaultValue="selling" className="w-full">
           <TabsList className="grid w-full grid-cols-2">

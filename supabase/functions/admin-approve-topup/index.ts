@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
       .select('role')
       .eq('user_id', user.id)
       .eq('role', 'admin')
-      .single();
+      .maybeSingle();
 
     if (!roles) {
       return new Response(
@@ -62,6 +62,24 @@ Deno.serve(async (req) => {
       });
 
       if (balanceError) throw balanceError;
+
+      // Create transaction record for the topup
+      const { error: txnError } = await supabase
+        .from('transactions')
+        .insert({
+          receiver_id: topup.user_id,
+          type: 'TOPUP',
+          amount_cents: topup.amount_cents,
+          fee_cents: 0,
+          status: 'COMPLETED',
+          approval_status: 'APPROVED',
+          memo: `Wallet top-up via ${topup.method.toUpperCase()} - Code: ${topup.code}`,
+        });
+
+      if (txnError) {
+        console.error('Error creating transaction:', txnError);
+        // Don't fail the whole operation if transaction creation fails
+      }
 
       // Mark topup as approved
       const { error: updateError } = await supabase
