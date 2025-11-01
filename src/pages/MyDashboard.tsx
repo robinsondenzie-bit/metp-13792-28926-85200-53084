@@ -95,7 +95,7 @@ export default function MyDashboard() {
       
       // Calculate selling stats
       const pending = sellingData?.filter(o => o.status === 'PENDING_PAYMENT' || o.status === 'PENDING_SHIPMENT').length || 0;
-      const shipped = sellingData?.filter(o => o.status === 'SHIPPED' || o.status === 'AWAITING_ADMIN_APPROVAL').length || 0;
+      const shipped = sellingData?.filter(o => o.status === 'SHIPPED' || o.status === 'AWAITING_ADMIN_APPROVAL' || o.status === 'AWAITING_RELEASE').length || 0;
       const completed = sellingData?.filter(o => o.status === 'COMPLETED') || [];
       const totalEarnings = completed.reduce((sum, o) => sum + o.amount_cents, 0);
 

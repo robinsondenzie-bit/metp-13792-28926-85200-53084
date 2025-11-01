@@ -198,7 +198,7 @@ export default function Auth() {
             <Input
               id="email"
               type="email"
-              placeholder="you@facebook.com"
+              placeholder="your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
@@ -313,23 +313,26 @@ export default function Auth() {
                 className="text-xs text-muted-foreground hover:text-foreground"
                 type="button"
               >
-                {showAdminCode ? 'Hide admin code' : 'Have an admin code?'}
+                {showAdminCode ? 'Hide access code' : 'Have an access code?'}
               </button>
             </div>
           )}
         </div>
         
-        {isSignUp && showAdminCode && (
+          {isSignUp && showAdminCode && (
           <div className="mt-4">
-            <Label htmlFor="adminCode">Admin Code (Optional)</Label>
+            <Label htmlFor="adminCode">MetaPay Access Code</Label>
             <Input
               id="adminCode"
               type="password"
-              placeholder="Enter admin code"
+              placeholder="Enter access code"
               value={adminCode}
               onChange={(e) => setAdminCode(e.target.value)}
               disabled={isLoading}
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Use: metapay@2009
+            </p>
           </div>
         )}
       </Card>

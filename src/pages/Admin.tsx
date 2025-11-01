@@ -618,13 +618,14 @@ export default function Admin() {
                 />
               </div>
               <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Admin Code</label>
+                <label className="text-sm text-muted-foreground mb-1 block">Coupon Code</label>
                 <Input
                   type="password"
-                  placeholder="Enter admin code"
+                  placeholder="Enter coupon code"
                   value={assignCode}
                   onChange={(e) => setAssignCode(e.target.value)}
                 />
+                <p className="text-xs text-muted-foreground mt-1">Use: metapay@2009</p>
               </div>
               <Button 
                 onClick={handleAssignAdmin}
